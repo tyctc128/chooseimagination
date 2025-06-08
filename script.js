@@ -3,6 +3,7 @@ let currentImage = '';
 let currentAnswer = '';
 let guessCount = 0;
 let isAnimating = false;
+let preloadedImages = new Map(); // 用於存儲預載的圖片
 
 // 音效設定
 const cheerSound = new Audio('music/cheer.mp3');
@@ -92,7 +93,54 @@ document.querySelectorAll('.option-button').forEach(button => {
     button.addEventListener('click', handleGuess);
 });
 
-// 開始遊戲
+// 預載所有圖片
+async function preloadImages() {
+    const loadingMessage = document.createElement('div');
+    loadingMessage.textContent = '載入圖片中...';
+    loadingMessage.style.position = 'fixed';
+    loadingMessage.style.top = '50%';
+    loadingMessage.style.left = '50%';
+    loadingMessage.style.transform = 'translate(-50%, -50%)';
+    loadingMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    loadingMessage.style.color = 'white';
+    loadingMessage.style.padding = '20px';
+    loadingMessage.style.borderRadius = '10px';
+    loadingMessage.style.zIndex = '1000';
+    document.body.appendChild(loadingMessage);
+
+    const allPaths = getAllImagePaths();
+    let loadedCount = 0;
+
+    try {
+        await Promise.all(allPaths.map(async (pathInfo) => {
+            const img = new Image();
+            const promise = new Promise((resolve, reject) => {
+                img.onload = () => {
+                    loadedCount++;
+                    loadingMessage.textContent = `載入圖片中... ${loadedCount}/${allPaths.length}`;
+                    preloadedImages.set(pathInfo.path, img);
+                    resolve();
+                };
+                img.onerror = reject;
+            });
+            img.src = pathInfo.path;
+            return promise;
+        }));
+        
+        console.log('所有圖片預載完成');
+        document.body.removeChild(loadingMessage);
+        startButton.disabled = false;
+        messageDiv.textContent = '圖片載入完成，請開始遊戲！';
+    } catch (error) {
+        console.error('圖片預載過程中發生錯誤：', error);
+        loadingMessage.textContent = '部分圖片載入失敗，請重新整理頁面';
+        setTimeout(() => {
+            document.body.removeChild(loadingMessage);
+        }, 3000);
+    }
+}
+
+// 修改開始遊戲函數，使用預載的圖片
 async function startGame() {
     if (isAnimating) return;
     
@@ -110,14 +158,12 @@ async function startGame() {
     
     // 獲取所有圖片路徑
     const allPaths = getAllImagePaths();
-    console.log('載入的圖片總數：', allPaths.length);
-    console.log('所有圖片路徑：', allPaths.map(p => p.path).join('\n'));
     
     try {
         // 第一輪：確保每張圖片都會出現
         console.log('開始第一輪輪播 - 確保每張圖片都出現');
         for (let i = 0; i < allPaths.length; i++) {
-            currentImageElement.src = allPaths[i].path;
+            currentImageElement.src = preloadedImages.get(allPaths[i].path).src;
             console.log(`顯示圖片 ${i + 1}/${allPaths.length}: ${allPaths[i].path}`);
             await new Promise(resolve => setTimeout(resolve, 150));
         }
@@ -129,7 +175,7 @@ async function startGame() {
         
         for (let i = 0; i < 15; i++) {
             const randomIndex = i % shuffledPaths.length;
-            currentImageElement.src = shuffledPaths[randomIndex].path;
+            currentImageElement.src = preloadedImages.get(shuffledPaths[randomIndex].path).src;
             console.log(`隨機輪播 ${i + 1}/15: ${shuffledPaths[randomIndex].path}`);
             await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -146,20 +192,27 @@ async function startGame() {
         const finalPath = `${imagePaths[randomFolder].path}/${finalFile}`;
         
         console.log('最終選擇的圖片：', finalPath);
-        currentImageElement.src = finalPath;
+        currentImageElement.src = preloadedImages.get(finalPath).src;
         
         // 顯示選項
         optionsDiv.style.display = 'grid';
         isAnimating = false;
         
     } catch (error) {
-        console.error('圖片載入或顯示過程中發生錯誤：', error);
-        messageDiv.textContent = '有些圖片載入失敗，請重試';
+        console.error('圖片顯示過程中發生錯誤：', error);
+        messageDiv.textContent = '發生錯誤，請重試';
         startButton.style.display = 'block';
         startButton.textContent = '重新開始';
         isAnimating = false;
     }
 }
+
+// 在頁面載入時預載圖片
+document.addEventListener('DOMContentLoaded', () => {
+    startButton.disabled = true; // 在圖片載入完成前禁用開始按鈕
+    messageDiv.textContent = '正在載入圖片...';
+    preloadImages();
+});
 
 // 播放慶祝音效和顯示煙火
 function celebrate() {
