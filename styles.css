@@ -12,6 +12,10 @@
     box-sizing: border-box;
 }
 
+html {
+    font-size: 16px; /* 基礎字體大小 */
+}
+
 body {
     font-family: "微軟正黑體", "Segoe UI", Arial, sans-serif;
     background-color: var(--secondary-color);
@@ -20,40 +24,44 @@ body {
     justify-content: center;
     align-items: center;
     color: var(--text-color);
+    padding: 1rem;
 }
 
 .container {
-    max-width: 1000px;
-    width: 90%;
-    margin: 2rem auto;
+    max-width: min(1000px, 95vw);
+    width: 100%;
+    margin: 1rem auto;
     text-align: center;
     background: rgba(10, 25, 47, 0.8);
     border: 1px solid var(--border-color);
     border-radius: 15px;
-    padding: 2rem;
+    padding: clamp(1rem, 3vw, 2rem);
     box-shadow: 0 0 20px rgba(100, 255, 218, 0.2);
     animation: glow 3s infinite;
 }
 
 h1 {
     color: var(--primary-color);
-    margin-bottom: 2rem;
-    font-size: 2.5rem;
+    margin-bottom: clamp(1rem, 3vw, 2rem);
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
     text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
     letter-spacing: 2px;
+    word-break: keep-all; /* 防止中文標題斷行 */
+    line-height: 1.3;
 }
 
 .game-area {
     background-color: rgba(10, 25, 47, 0.5);
-    padding: 2rem;
+    padding: clamp(1rem, 3vw, 2rem);
     border-radius: 15px;
     border: 1px solid var(--border-color);
 }
 
 .image-display {
-    margin: 2rem auto;
-    width: 600px;
-    height: 400px;
+    margin: clamp(1rem, 3vw, 2rem) auto;
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 3/2;
     border: 2px solid var(--border-color);
     border-radius: 10px;
     overflow: hidden;
@@ -71,16 +79,19 @@ h1 {
 .start-button, .option-button {
     background-color: transparent;
     color: var(--primary-color);
-    padding: 1rem 2rem;
+    padding: clamp(0.5rem, 2vw, 1rem) clamp(1rem, 3vw, 2rem);
     border: 2px solid var(--primary-color);
     border-radius: 5px;
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
     position: relative;
     overflow: hidden;
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .start-button:hover, .option-button:hover {
@@ -111,21 +122,22 @@ h1 {
 
 .options {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    margin-top: 2rem;
-    padding: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    margin-top: clamp(1rem, 3vw, 2rem);
+    padding: clamp(0.5rem, 2vw, 1rem);
 }
 
 .message {
-    margin-top: 1.5rem;
-    padding: 1rem;
-    font-size: 1.2rem;
+    margin-top: clamp(1rem, 2vw, 1.5rem);
+    padding: clamp(0.5rem, 2vw, 1rem);
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
     color: var(--accent-color);
     min-height: 60px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     border: 1px solid var(--border-color);
+    word-wrap: break-word;
 }
 
 .firework {
@@ -158,5 +170,52 @@ h1 {
     }
     100% {
         box-shadow: 0 0 5px var(--primary-color);
+    }
+}
+
+/* 觸控設備優化 */
+@media (hover: none) {
+    .start-button:hover, .option-button:hover {
+        transform: none;
+    }
+    
+    .start-button:active, .option-button:active {
+        background-color: rgba(0, 255, 157, 0.1);
+        transform: scale(0.98);
+    }
+}
+
+/* 確保在較小螢幕上的最小可讀性 */
+@media screen and (max-width: 360px) {
+    html {
+        font-size: 14px;
+    }
+    
+    .container {
+        padding: 0.75rem;
+    }
+    
+    .game-area {
+        padding: 0.75rem;
+    }
+    
+    .options {
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+}
+
+/* 針對較大螢幕的優化 */
+@media screen and (min-width: 1200px) {
+    html {
+        font-size: 18px;
+    }
+    
+    .container {
+        max-width: 1200px;
+    }
+    
+    .image-display {
+        max-width: 800px;
     }
 } 
