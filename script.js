@@ -14,7 +14,7 @@ const imagePaths = {
     'compose': {
         path: 'images/compose',
         answer: '加加減減法',
-        files: ['1.png', '2.png', '3.png']
+        files: ['1.png', '2.png', '3.png', '4.jpg']
     },
     'multi': {
         path: 'images/multi',
