@@ -87,11 +87,18 @@ const optionsDiv = document.getElementById('options');
 const messageDiv = document.getElementById('message');
 const fireworksDiv = document.getElementById('fireworks');
 
+// 密碼相關 DOM 元素
+const passwordEntryDiv = document.getElementById('passwordEntry');
+const passwordInput = document.getElementById('passwordInput');
+const passwordSubmitButton = document.getElementById('passwordSubmitButton');
+const passwordErrorMessage = document.getElementById('passwordErrorMessage');
+const passwordProtectedContent = document.getElementById('passwordProtectedContent');
+
+const CORRECT_PASSWORD = "1234";
+
 // 事件監聽器
-startButton.addEventListener('click', startGame);
-document.querySelectorAll('.option-button').forEach(button => {
-    button.addEventListener('click', handleGuess);
-});
+// startButton 的事件監聽器將在密碼驗證成功後添加
+// document.querySelectorAll('.option-button') 的事件監聽器也將在密碼驗證成功後添加
 
 // 預載所有圖片
 async function preloadImages() {
@@ -106,12 +113,18 @@ async function preloadImages() {
     loadingMessage.style.padding = '20px';
     loadingMessage.style.borderRadius = '10px';
     loadingMessage.style.zIndex = '1000';
-    document.body.appendChild(loadingMessage);
+    // 將載入訊息附加到 passwordProtectedContent 內部或 body，確保在密碼驗證前不顯示
+    // 這裡我們選擇附加到 body，但在密碼驗證成功後才調用 preLoadImages
+    // 或者，我們可以將 loadingMessage 放在 passwordProtectedContent 裡面，但這樣它初始也是隱藏的
+    // 為了簡化，我們先在密碼成功後再顯示載入訊息
 
     const allPaths = getAllImagePaths();
     let loadedCount = 0;
 
     try {
+        // 顯示載入訊息
+        document.body.appendChild(loadingMessage);
+
         await Promise.all(allPaths.map(async (pathInfo) => {
             const img = new Image();
             const promise = new Promise((resolve, reject) => {
@@ -128,15 +141,23 @@ async function preloadImages() {
         }));
         
         console.log('所有圖片預載完成');
-        document.body.removeChild(loadingMessage);
+        if (document.body.contains(loadingMessage)) {
+            document.body.removeChild(loadingMessage);
+        }
         startButton.disabled = false;
-        messageDiv.textContent = '圖片載入完成，請開始遊戲！';
+        if (messageDiv) { // 確保 messageDiv 存在
+            messageDiv.textContent = '圖片載入完成，請開始遊戲！';
+        }
     } catch (error) {
         console.error('圖片預載過程中發生錯誤：', error);
-        loadingMessage.textContent = '部分圖片載入失敗，請重新整理頁面';
-        setTimeout(() => {
-            document.body.removeChild(loadingMessage);
-        }, 3000);
+        if (document.body.contains(loadingMessage)) {
+            loadingMessage.textContent = '部分圖片載入失敗，請重新整理頁面';
+            setTimeout(() => {
+                if (document.body.contains(loadingMessage)) {
+                    document.body.removeChild(loadingMessage);
+                }
+            }, 3000);
+        }
     }
 }
 
@@ -146,9 +167,9 @@ async function startGame() {
     
     isAnimating = true;
     guessCount = 0;
-    messageDiv.textContent = '開始輪播...';
-    startButton.style.display = 'none';
-    currentImageElement.style.display = 'block';
+    if (messageDiv) messageDiv.textContent = '開始輪播...';
+    if (startButton) startButton.style.display = 'none';
+    if (currentImageElement) currentImageElement.style.display = 'block';
     
     // 重置所有按鈕狀態
     document.querySelectorAll('.option-button').forEach(button => {
@@ -163,9 +184,11 @@ async function startGame() {
         // 第一輪：確保每張圖片都會出現
         console.log('開始第一輪輪播 - 確保每張圖片都出現');
         for (let i = 0; i < allPaths.length; i++) {
-            currentImageElement.src = preloadedImages.get(allPaths[i].path).src;
-            console.log(`顯示圖片 ${i + 1}/${allPaths.length}: ${allPaths[i].path}`);
-            await new Promise(resolve => setTimeout(resolve, 150));
+            if (preloadedImages.has(allPaths[i].path) && currentImageElement) {
+                currentImageElement.src = preloadedImages.get(allPaths[i].path).src;
+                console.log(`顯示圖片 ${i + 1}/${allPaths.length}: ${allPaths[i].path}`);
+                await new Promise(resolve => setTimeout(resolve, 150));
+            }
         }
         
         // 第二輪：隨機輪播
@@ -175,12 +198,14 @@ async function startGame() {
         
         for (let i = 0; i < 15; i++) {
             const randomIndex = i % shuffledPaths.length;
-            currentImageElement.src = preloadedImages.get(shuffledPaths[randomIndex].path).src;
-            console.log(`隨機輪播 ${i + 1}/15: ${shuffledPaths[randomIndex].path}`);
-            await new Promise(resolve => setTimeout(resolve, 100));
+            if (preloadedImages.has(shuffledPaths[randomIndex].path) && currentImageElement) {
+                currentImageElement.src = preloadedImages.get(shuffledPaths[randomIndex].path).src;
+                console.log(`隨機輪播 ${i + 1}/15: ${shuffledPaths[randomIndex].path}`);
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
         }
         
-        messageDiv.textContent = '';
+        if (messageDiv) messageDiv.textContent = '';
         
         // 選擇最終答案和圖片
         const folders = Object.keys(imagePaths);
@@ -192,26 +217,70 @@ async function startGame() {
         const finalPath = `${imagePaths[randomFolder].path}/${finalFile}`;
         
         console.log('最終選擇的圖片：', finalPath);
-        currentImageElement.src = preloadedImages.get(finalPath).src;
+        if (preloadedImages.has(finalPath) && currentImageElement) {
+            currentImageElement.src = preloadedImages.get(finalPath).src;
+        }
         
         // 顯示選項
-        optionsDiv.style.display = 'grid';
+        if (optionsDiv) optionsDiv.style.display = 'grid';
         isAnimating = false;
         
     } catch (error) {
         console.error('圖片顯示過程中發生錯誤：', error);
-        messageDiv.textContent = '發生錯誤，請重試';
-        startButton.style.display = 'block';
-        startButton.textContent = '重新開始';
+        if (messageDiv) messageDiv.textContent = '發生錯誤，請重試';
+        if (startButton) {
+            startButton.style.display = 'block';
+            startButton.textContent = '重新開始';
+        }
         isAnimating = false;
     }
 }
 
-// 在頁面載入時預載圖片
+// 密碼驗證函數
+function handlePasswordSubmit() {
+    const enteredPassword = passwordInput.value;
+    if (enteredPassword === CORRECT_PASSWORD) {
+        passwordEntryDiv.style.display = 'none';
+        passwordProtectedContent.style.display = 'block';
+
+        // 初始化遊戲內容的事件監聽器
+        if (startButton) {
+            startButton.addEventListener('click', startGame);
+            startButton.disabled = true; // 在圖片載入完成前禁用開始按鈕
+        }
+        document.querySelectorAll('.option-button').forEach(button => {
+            button.addEventListener('click', handleGuess);
+        });
+        if (messageDiv) messageDiv.textContent = '正在載入圖片...';
+        preloadImages(); // 密碼正確後開始預載圖片
+
+    } else {
+        passwordErrorMessage.textContent = '密碼錯誤，請重試！';
+        passwordErrorMessage.style.display = 'block';
+        passwordInput.value = ''; // 清空輸入框
+    }
+}
+
+// 頁面載入完成後執行的操作
 document.addEventListener('DOMContentLoaded', () => {
-    startButton.disabled = true; // 在圖片載入完成前禁用開始按鈕
-    messageDiv.textContent = '正在載入圖片...';
-    preloadImages();
+    // 綁定密碼提交事件
+    if (passwordSubmitButton) {
+        passwordSubmitButton.addEventListener('click', handlePasswordSubmit);
+    }
+    // 允許Enter鍵提交密碼
+    if (passwordInput) {
+        passwordInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                handlePasswordSubmit();
+            }
+        });
+    }
+
+    // 遊戲相關的初始化（如 preloadImages）將在密碼驗證成功後調用
+    // startButton.disabled = true;
+    // messageDiv.textContent = '正在載入圖片...';
+    // preloadImages();
+    // 上述三行移至 handlePasswordSubmit 成功驗證後
 });
 
 // 播放慶祝音效和顯示煙火

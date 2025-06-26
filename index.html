@@ -9,23 +9,33 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>圖像創意猜謎遊戲</h1>
-        <div class="game-area">
-            <button id="startButton" class="start-button">開始遊戲</button>
-            <div id="imageDisplay" class="image-display">
-                <img id="currentImage" src="" alt="遊戲圖片" style="display: none;">
+    <div id="passwordProtectedContent" style="display: none;">
+        <div class="container">
+            <h1>圖像創意猜謎遊戲</h1>
+            <div class="game-area">
+                <button id="startButton" class="start-button">開始遊戲</button>
+                <div id="imageDisplay" class="image-display">
+                    <img id="currentImage" src="" alt="遊戲圖片" style="display: none;">
+                </div>
+                <div id="options" class="options" style="display: none;">
+                    <button class="option-button" data-option="加加減減法">加加減減法</button>
+                    <button class="option-button" data-option="改變大小法">改變大小法</button>
+                    <button class="option-button" data-option="萬物有靈法">萬物有靈法</button>
+                    <button class="option-button" data-option="複合式">複合式</button>
+                </div>
+                <div id="message" class="message"></div>
             </div>
-            <div id="options" class="options" style="display: none;">
-                <button class="option-button" data-option="加加減減法">加加減減法</button>
-                <button class="option-button" data-option="改變大小法">改變大小法</button>
-                <button class="option-button" data-option="萬物有靈法">萬物有靈法</button>
-                <button class="option-button" data-option="複合式">複合式</button>
-            </div>
-            <div id="message" class="message"></div>
         </div>
+        <div id="fireworks" class="fireworks"></div>
     </div>
-    <div id="fireworks" class="fireworks"></div>
+
+    <div id="passwordEntry" class="password-entry-container">
+        <h2>請輸入密碼</h2>
+        <input type="password" id="passwordInput" placeholder="輸入密碼">
+        <button id="passwordSubmitButton" class="start-button">提交</button>
+        <p id="passwordErrorMessage" class="message" style="display: none; color: red;"></p>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html> 

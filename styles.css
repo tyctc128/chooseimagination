@@ -217,4 +217,65 @@ h1 {
     .image-display {
         max-width: 800px;
     }
-} 
+}
+
+/* 密碼輸入區域樣式 */
+.password-entry-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: rgba(10, 25, 47, 0.85); /* 與 .container 相似但可稍作區別 */
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(100, 255, 218, 0.25);
+    width: 100%;
+    max-width: 450px; /* 限制密碼框寬度 */
+    margin: auto; /* 使其在 body flex 容器中居中 */
+}
+
+.password-entry-container h2 {
+    color: var(--primary-color);
+    margin-bottom: clamp(1rem, 3vw, 1.5rem);
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    text-shadow: 0 0 8px rgba(0, 255, 157, 0.3);
+}
+
+#passwordInput {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--text-color);
+    padding: clamp(0.6rem, 2vw, 0.8rem);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: clamp(1rem, 2.5vw, 1.1rem);
+    width: 100%;
+    max-width: 300px; /* 限制輸入框寬度 */
+    margin-bottom: clamp(1rem, 3vw, 1.5rem);
+    text-align: center;
+}
+
+#passwordInput::placeholder {
+    color: rgba(230, 241, 255, 0.5);
+}
+
+#passwordInput:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+}
+
+#passwordSubmitButton { /* 與 .start-button 樣式共用，但可在此微調 */
+    width: auto; /* 讓按鈕寬度自適應內容 */
+    min-width: 150px; /* 設定最小寬度 */
+    padding: clamp(0.5rem, 2vw, 0.8rem) clamp(1.5rem, 4vw, 2.5rem); /* 調整 padding */
+}
+
+#passwordErrorMessage {
+    min-height: auto; /* 覆蓋 .message 的 min-height */
+    padding: clamp(0.4rem, 1.5vw, 0.6rem); /* 調整 padding */
+    margin-top: clamp(0.8rem, 2vw, 1.2rem);
+    background-color: rgba(255, 0, 0, 0.1); /* 淡紅色背景以示錯誤 */
+    border-color: rgba(255, 0, 0, 0.3);
+    color: #ffdddd; /* 淺紅色文字 */
+}
